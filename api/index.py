@@ -10,6 +10,35 @@ import requests
 # Add parent directory to path so we can import from the root
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# For Vercel, we need to make sure all directories are in the writable /tmp path
+if 'VERCEL' in os.environ:
+    # Use /tmp directory on Vercel for writable files
+    CONFIG_FILE = '/tmp/config.json'
+    CSV_FILE = '/tmp/mentions_metadata.csv'
+    SAVE_FOLDER = '/tmp/mentions'
+    STATIC_FOLDER = '/tmp/static'
+    TEMPLATES_FOLDER = '/tmp/templates'
+    
+    # Ensure directories exist before importing the app
+    os.makedirs(SAVE_FOLDER, exist_ok=True)
+    os.makedirs(STATIC_FOLDER, exist_ok=True)
+    os.makedirs(TEMPLATES_FOLDER, exist_ok=True)
+    
+    # Set environment variables to override paths in the main app
+    os.environ['SAVE_FOLDER'] = SAVE_FOLDER
+    os.environ['STATIC_FOLDER'] = STATIC_FOLDER
+    os.environ['TEMPLATES_FOLDER'] = TEMPLATES_FOLDER
+    os.environ['CONFIG_FILE'] = CONFIG_FILE
+    os.environ['CSV_FILE'] = CSV_FILE
+
+# Override the original constants in tracker.py before importing
+import tracker
+if 'VERCEL' in os.environ:
+    # Update the global variables in the original module
+    tracker.SAVE_FOLDER = os.environ.get('SAVE_FOLDER', tracker.SAVE_FOLDER)
+    tracker.CONFIG_FILE = os.environ.get('CONFIG_FILE', tracker.CONFIG_FILE)
+    tracker.CSV_FILE = os.environ.get('CSV_FILE', tracker.CSV_FILE)
+    
 # Import the original app
 from tracker import app as flask_app
 
@@ -20,22 +49,8 @@ app = flask_app
 if 'FLASK_SECRET_KEY' in os.environ:
     app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
-# For Vercel, we need to make sure the CSV and config files are in a writable location
-if 'VERCEL' in os.environ:
-    # Use /tmp directory on Vercel for writable files
-    CONFIG_FILE = '/tmp/config.json'
-    CSV_FILE = '/tmp/mentions_metadata.csv'
-    SAVE_FOLDER = '/tmp/mentions'
-    
-    # Update the global variables in the original module
-    import tracker
-    tracker.CONFIG_FILE = CONFIG_FILE
-    tracker.CSV_FILE = CSV_FILE
-    tracker.SAVE_FOLDER = SAVE_FOLDER
-    
-    # Ensure directories exist
-    os.makedirs(SAVE_FOLDER, exist_ok=True)
-    
+# For Vercel, we need to update the app configuration
+if 'VERCEL' in os.environ:    
     # Initialize CSV if it doesn't exist
     if not os.path.exists(CSV_FILE):
         with open(CSV_FILE, mode='w', newline='', encoding='utf-8') as f:

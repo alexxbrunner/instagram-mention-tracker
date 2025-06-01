@@ -10,18 +10,20 @@ import time
 import urllib.parse
 
 # === CONFIGURATION ===
-CONFIG_FILE = 'config.json'
-SAVE_FOLDER = 'static/mentions'
-CSV_FILE = 'mentions_metadata.csv'
+CONFIG_FILE = os.environ.get('CONFIG_FILE', 'config.json')
+SAVE_FOLDER = os.environ.get('SAVE_FOLDER', 'static/mentions')
+CSV_FILE = os.environ.get('CSV_FILE', 'mentions_metadata.csv')
 CHECK_INTERVAL = 3600  # Check for new mentions every hour (in seconds)
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(16))
 
 # === Ensure directories exist ===
-os.makedirs(SAVE_FOLDER, exist_ok=True)
-os.makedirs('templates', exist_ok=True)
-os.makedirs('static', exist_ok=True)
+# Only create directories if not running on Vercel (handled in api/index.py for Vercel)
+if 'VERCEL' not in os.environ:
+    os.makedirs(SAVE_FOLDER, exist_ok=True)
+    os.makedirs('templates', exist_ok=True)
+    os.makedirs('static', exist_ok=True)
 
 # === Load Config ===
 def load_config():
@@ -29,12 +31,12 @@ def load_config():
         with open(CONFIG_FILE, 'r') as f:
             return json.load(f)
     return {
-        'app_id': '',
-        'app_secret': '',
-        'redirect_uri': '',
-        'access_token': '',
-        'ig_user_id': '',
-        'check_interval': CHECK_INTERVAL
+        'app_id': os.environ.get('INSTAGRAM_APP_ID', ''),
+        'app_secret': os.environ.get('INSTAGRAM_APP_SECRET', ''),
+        'redirect_uri': os.environ.get('REDIRECT_URI', ''),
+        'access_token': os.environ.get('INSTAGRAM_ACCESS_TOKEN', ''),
+        'ig_user_id': os.environ.get('INSTAGRAM_USER_ID', ''),
+        'check_interval': int(os.environ.get('CHECK_INTERVAL', CHECK_INTERVAL))
     }
 
 # === Save Config ===

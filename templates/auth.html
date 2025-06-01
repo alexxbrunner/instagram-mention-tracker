@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Instagram - Mentions Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .auth-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .auth-step {
+            border-left: 3px solid #0d6efd;
+            padding-left: 20px;
+            margin-bottom: 25px;
+        }
+        .step-number {
+            background-color: #0d6efd;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        .connect-btn {
+            transition: all 0.3s;
+        }
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Instagram Mentions Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('auth') }}">Connect Instagram</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="auth-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Connect Your Instagram Account</h2>
+                    
+                    <div class="auth-step">
+                        <h4><span class="step-number">1</span>Enter Your Facebook App Information</h4>
+                        <p>You'll need to create a Facebook App with Instagram Basic Display API permissions.</p>
+                        
+                        <form method="POST" action="{{ url_for('save_app_info') }}" class="mb-4">
+                            <div class="mb-3">
+                                <label for="app_id" class="form-label">App ID</label>
+                                <input type="text" class="form-control" id="app_id" name="app_id" 
+                                       value="{{ app_id }}" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="app_secret" class="form-label">App Secret</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="app_secret" name="app_secret" 
+                                           value="{{ app_secret }}" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
+                                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                        </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-slash d-none" viewBox="0 0 16 16">
+                                            <path d="M13.359 11.238C15.06 9.72 16 8 16 8s-3-5.5-8-5.5a7.028 7.028 0 0 0-2.79.588l.77.771A5.944 5.944 0 0 1 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755-.165.165-.337.328-.517.486l.708.709z"/>
+                                            <path d="M11.297 9.176a3.5 3.5 0 0 0-4.474-4.474l.823.823a2.5 2.5 0 0 1 2.829 2.829l.822.822zm-2.943 1.299.822.822a3.5 3.5 0 0 1-4.474-4.474l.823.823a2.5 2.5 0 0 0 2.829 2.829z"/>
+                                            <path d="M3.35 5.47c-.18.16-.353.322-.518.487A13.134 13.134 0 0 0 1.172 8l.195.288c.335.48.83 1.12 1.465 1.755C4.121 11.332 5.881 12.5 8 12.5c.716 0 1.39-.133 2.02-.36l.77.772A7.029 7.029 0 0 1 8 13.5C3 13.5 0 8 0 8s.939-1.721 2.641-3.238l.708.709zm10.296 8.884-12-12 .708-.708 12 12-.708.708z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="redirect_uri" class="form-label">Redirect URI</label>
+                                <input type="text" class="form-control" id="redirect_uri" name="redirect_uri" 
+                                       value="{{ redirect_uri or request.url_root + 'auth/callback' }}" required>
+                                <div class="form-text">This should match one of the redirect URIs in your Facebook App settings</div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Save App Info</button>
+                        </form>
+                    </div>
+                    
+                    <div class="auth-step">
+                        <h4><span class="step-number">2</span>Connect to Instagram</h4>
+                        <p>Click the button below to authorize this app to access your Instagram account data.</p>
+                        
+                        {% if app_id and app_secret %}
+                        <a href="{{ auth_url }}" class="btn btn-lg btn-instagram connect-btn d-flex align-items-center justify-content-center" style="background-color: #E1306C; color: white;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-instagram me-2" viewBox="0 0 16 16">
+                                <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/>
+                            </svg>
+                            Connect to Instagram
+                        </a>
+                        {% else %}
+                        <button class="btn btn-lg btn-instagram connect-btn" style="background-color: #E1306C; color: white;" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-instagram me-2" viewBox="0 0 16 16">
+                                <path d="M8 0C5.829 0 5.556.01 4.703.048 3.85.088 3.269.222 2.76.42a3.917 3.917 0 0 0-1.417.923A3.927 3.927 0 0 0 .42 2.76C.222 3.268.087 3.85.048 4.7.01 5.555 0 5.827 0 8.001c0 2.172.01 2.444.048 3.297.04.852.174 1.433.372 1.942.205.526.478.972.923 1.417.444.445.89.719 1.416.923.51.198 1.09.333 1.942.372C5.555 15.99 5.827 16 8 16s2.444-.01 3.298-.048c.851-.04 1.434-.174 1.943-.372a3.916 3.916 0 0 0 1.416-.923c.445-.445.718-.891.923-1.417.197-.509.332-1.09.372-1.942C15.99 10.445 16 10.173 16 8s-.01-2.445-.048-3.299c-.04-.851-.175-1.433-.372-1.941a3.926 3.926 0 0 0-.923-1.417A3.911 3.911 0 0 0 13.24.42c-.51-.198-1.092-.333-1.943-.372C10.443.01 10.172 0 7.998 0h.003zm-.717 1.442h.718c2.136 0 2.389.007 3.232.046.78.035 1.204.166 1.486.275.373.145.64.319.92.599.28.28.453.546.598.92.11.281.24.705.275 1.485.039.843.047 1.096.047 3.231s-.008 2.389-.047 3.232c-.035.78-.166 1.203-.275 1.485a2.47 2.47 0 0 1-.599.919c-.28.28-.546.453-.92.598-.28.11-.704.24-1.485.276-.843.038-1.096.047-3.232.047s-2.39-.009-3.233-.047c-.78-.036-1.203-.166-1.485-.276a2.478 2.478 0 0 1-.92-.598 2.48 2.48 0 0 1-.6-.92c-.109-.281-.24-.705-.275-1.485-.038-.843-.046-1.096-.046-3.233 0-2.136.008-2.388.046-3.231.036-.78.166-1.204.276-1.486.145-.373.319-.64.599-.92.28-.28.546-.453.92-.598.282-.11.705-.24 1.485-.276.738-.034 1.024-.044 2.515-.045v.002zm4.988 1.328a.96.96 0 1 0 0 1.92.96.96 0 0 0 0-1.92zm-4.27 1.122a4.109 4.109 0 1 0 0 8.217 4.109 4.109 0 0 0 0-8.217zm0 1.441a2.667 2.667 0 1 1 0 5.334 2.667 2.667 0 0 1 0-5.334z"/>
+                            </svg>
+                            Connect to Instagram
+                        </button>
+                        <p class="text-muted mt-2">Complete Step 1 first to enable this button</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="auth-step">
+                        <h4><span class="step-number">3</span>After Authorization</h4>
+                        <p>Once authorized, you'll be redirected back to the app with your Instagram access token.</p>
+                        <p>The token will be saved locally and you can start tracking your Instagram mentions!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <p>To set up your Facebook App for Instagram API access via Facebook:</p>
+                    <ol>
+                        <li>Go to <a href="https://developers.facebook.com" target="_blank">developers.facebook.com</a> and create an app</li>
+                        <li>Choose <strong>Business</strong> app type</li>
+                        <li>Add these products to your app:
+                            <ul>
+                                <li><strong>Facebook Login</strong></li>
+                                <li><strong>Instagram Graph API</strong></li>
+                            </ul>
+                        </li>
+                        <li>Configure your app's settings:
+                            <ul>
+                                <li>In Facebook Login settings, add <code>{{ request.url_root + 'auth/callback' }}</code> as a Valid OAuth Redirect URI</li>
+                                <li>Also add <code>localhost</code> to App Domains</li>
+                                <li>Under Basic Settings, make sure Site URL is set to <code>{{ request.url_root }}</code></li>
+                                <li>Request these permissions in App Review:
+                                    <ul>
+                                        <li><code>instagram_basic</code></li>
+                                        <li><code>instagram_content_publish</code></li>
+                                        <li><code>pages_show_list</code></li>
+                                    </ul>
+                                </li>
+                                <li>For "App Authentication" set "Native or desktop app" to "Enabled"</li>
+                                <li>Make sure your app is in <strong>Live Mode</strong> (switch in the top-right of the dashboard)</li>
+                            </ul>
+                        </li>
+                        <li>Use the <strong>Facebook App ID and App Secret</strong> (not Instagram App ID)</li>
+                    </ol>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Important Requirements:</strong><br>
+                        For Facebook login to work with Instagram, you need:
+                        <ul>
+                            <li>A <strong>Business Instagram account</strong> connected to a Facebook Page</li>
+                            <li>Admin access to both the Instagram account and Facebook Page</li>
+                            <li>Your app must be in Live Mode for non-test users</li>
+                            <li>All requested permissions must be approved in App Review</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>Fixing "Invalid platform app" Error:</strong><br>
+                        This error usually happens when:
+                        <ul>
+                            <li>Your app is not in Live Mode</li>
+                            <li>The redirect URI is not properly set up in app settings</li>
+                            <li>App Domains doesn't include "localhost" or your domain</li>
+                            <li>You're using an account that's not an admin or tester</li>
+                            <li>You need to add the domain to the "Valid OAuth Redirect URIs" section</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light text-center text-muted py-4 mt-5">
+        <div class="container">
+            <p>Instagram Mentions Tracker</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('app_secret');
+            const eyeIcon = togglePassword.querySelector('.bi-eye');
+            const eyeSlashIcon = togglePassword.querySelector('.bi-eye-slash');
+            
+            togglePassword.addEventListener('click', function() {
+                // Toggle the type attribute
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle the icon
+                eyeIcon.classList.toggle('d-none');
+                eyeSlashIcon.classList.toggle('d-none');
+            });
+        });
+    </script>
+</body>
+</html> 
